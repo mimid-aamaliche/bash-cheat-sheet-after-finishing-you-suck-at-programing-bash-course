@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bash Cheat Sheet</title>
+<style>
+:root{
+  --bg:#12140f; --panel:#181b14; --ink:#e7e6dc; --dim:#9a9d8d;
+  --accent:#8fd14f; --accent2:#e0b559; --rule:#2c3024; --code:#0e0f0b;
+  --radius:3px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:inherit}
+html{scroll-padding-top:calc(56px + env(safe-area-inset-top,0px))}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f4f3ec; --panel:#ffffff; --ink:#1d1f17; --dim:#5c5f4e;
+    --accent:#3f7d1f; --accent2:#8a5a12; --rule:#dedbc9; --code:#eeece0;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#f4f3ec; --panel:#ffffff; --ink:#1d1f17; --dim:#5c5f4e;
+  --accent:#3f7d1f; --accent2:#8a5a12; --rule:#dedbc9; --code:#eeece0;
+}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:15px/1.55 "SF Mono","Fira Code","JetBrains Mono",Menlo,Consolas,monospace;
+}
+code,pre,kbd{font-family:inherit}
+a{color:var(--accent)}
+.topbar{
+  position:sticky; top:0; z-index:20;
+  padding-top:env(safe-area-inset-top,0px);
+  background:var(--bg); border-bottom:1px solid var(--rule);
+}
+.topbar-inner{
+  max-width:1200px; margin:0 auto; padding:14px 20px;
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+.brand{font-weight:700; letter-spacing:.02em; color:var(--ink); white-space:nowrap}
+.brand span{color:var(--accent)}
+#search{
+  flex:1; min-width:160px; max-width:340px; background:var(--code); color:var(--ink);
+  border:1px solid var(--rule); border-radius:var(--radius); padding:7px 10px; font:inherit; font-size:13px;
+}
+#search:focus{outline:1px solid var(--accent)}
+.toggle{
+  background:none; border:1px solid var(--rule); color:var(--dim); border-radius:var(--radius);
+  padding:6px 10px; font:inherit; font-size:12px; cursor:pointer;
+}
+.toggle:hover{color:var(--ink)}
+.layout{max-width:1200px; margin:0 auto; display:flex; gap:0; align-items:flex-start}
+nav.toc{
+  position:sticky; top:calc(56px + env(safe-area-inset-top,0px));
+  width:210px; flex:none; height:calc(100vh - 56px); overflow-y:auto;
+  padding:20px 12px 40px; border-right:1px solid var(--rule);
+}
+nav.toc a{
+  display:block; color:var(--dim); text-decoration:none; font-size:12.5px;
+  padding:4px 8px; border-radius:var(--radius); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+nav.toc a:hover{color:var(--ink); background:var(--panel)}
+main{flex:1; min-width:0; padding:28px 24px 80px; overflow-x:auto}
+.hero{margin-bottom:28px}
+.hero h1{font-size:22px; margin:0 0 6px; letter-spacing:-0.01em}
+.hero p{color:var(--dim); margin:0; font-size:13px}
+.grid{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:14px;
+}
+section.card{
+  background:var(--panel); border:1px solid var(--rule); border-left:3px solid var(--accent);
+  border-radius:var(--radius); padding:16px 18px; scroll-margin-top:70px;
+}
+section.card.wide{grid-column:1/-1}
+section.card h2{
+  font-size:13.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent2);
+  margin:0 0 10px; display:flex; align-items:center; gap:8px;
+}
+section.card h2 .n{color:var(--dim); font-weight:400}
+p.note{color:var(--dim); font-size:13px; margin:6px 0}
+pre{
+  background:var(--code); border:1px solid var(--rule); border-radius:var(--radius);
+  padding:10px 12px; overflow-x:auto; margin:8px 0; font-size:13px; line-height:1.5;
+}
+pre .c{color:var(--dim)} /* comment */
+code.inline{background:var(--code); border:1px solid var(--rule); border-radius:var(--radius); padding:1px 5px; font-size:.92em}
+table{width:100%; border-collapse:collapse; font-size:13px; margin:8px 0}
+th,td{text-align:left; padding:5px 8px; border-bottom:1px solid var(--rule); vertical-align:top}
+th{color:var(--dim); font-weight:600; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em}
+ul.tight{margin:6px 0; padding-left:18px; font-size:13.5px}
+ul.tight li{margin:3px 0}
+.pitfall{border-left-color:var(--accent2)}
+footer{color:var(--dim); font-size:12px; text-align:center; padding:30px 0 10px}
+.hide{display:none !important}
+mark{background:var(--accent); color:var(--bg); border-radius:2px}
+@media (max-width:860px){
+  nav.toc{display:none}
+  main{padding:20px 16px 60px}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">$ <span>bash</span> --cheatsheet</div>
+    <input id="search" type="text" placeholder="Filter sections… (e.g. array, printf, trap)">
+    <button class="toggle" id="themeBtn" type="button">Toggle theme</button>
+  </div>
+</div>
+
+<div class="layout">
+  <nav class="toc" id="toc"></nav>
+  <main id="main">
+    <div class="hero">
+      <h1>Bash Cheat Sheet</h1>
+      <p>Reference notes from Dave Eddy's free "You Suck at Programming" Bash course — organized by topic, not by timestamp.</p>
+    </div>
+
+    <div class="grid" id="grid">
+
+<section class="card" id="basics"><h2>1 · Terminal basics <span class="n">navigation</span></h2>
+<pre>pwd                  <span class="c"># print working directory</span>
+ls -la               <span class="c"># -a hidden, -l long listing</span>
+cd dir / cd .. / cd - / cd
+touch file           <span class="c"># create / update timestamp</span>
+rm file              <span class="c"># PERMANENT — no trash. rm -i to confirm</span>
+mv old new           <span class="c"># silently overwrites existing dest!</span>
+cp src dst
+mkdir name</pre>
+<p class="note">Shell = REPL (read → eval → print → loop). <code class="inline">.</code> = current dir, <code class="inline">..</code> = parent, both built into every dir.</p>
+</section>
+
+<section class="card" id="glob"><h2>2 · Basic globbing</h2>
+<table><tr><td><code class="inline">*</code></td><td>zero or more chars</td></tr>
+<tr><td><code class="inline">?</code></td><td>exactly one char</td></tr>
+<tr><td><code class="inline">[abc]</code></td><td>one of a/b/c</td></tr></table>
+<p class="note">Quote patterns before passing to a program: <code class="inline">find . -name "*.txt"</code></p>
+</section>
+
+<section class="card" id="redir"><h2>3 · Redirection & pipes</h2>
+<table>
+<tr><th>syntax</th><th>meaning</th></tr>
+<tr><td><code class="inline">cmd &gt; file</code></td><td>stdout → file (overwrite)</td></tr>
+<tr><td><code class="inline">cmd &gt;&gt; file</code></td><td>stdout → file (append)</td></tr>
+<tr><td><code class="inline">cmd &lt; file</code></td><td>file → stdin</td></tr>
+<tr><td><code class="inline">cmd1 | cmd2</code></td><td>pipe stdout → stdin</td></tr>
+<tr><td><code class="inline">cmd 2&gt; file</code></td><td>stderr → file only</td></tr>
+<tr><td><code class="inline">cmd &gt; f 2&gt;&amp;1</code></td><td>both → same file (order matters!)</td></tr>
+<tr><td><code class="inline">cmd 2&gt;&amp;1 &gt;f</code></td><td>stderr→screen, stdout→file</td></tr>
+</table>
+<p class="note">fd 0=stdin, 1=stdout, 2=stderr. <code class="inline">2&gt;&amp;1</code> means "point fd2 at whatever fd1 points to <em>right now</em>" — a snapshot, not a live link.</p>
+</section>
+
+<section class="card" id="search"><h2>4 · Search / pager / docs</h2>
+<pre>grep -i -o -c -A2 -B2 -C2 pattern file
+less file            <span class="c"># j/k move, /pat search, n/N next/prev, q quit</span>
+man cmd               <span class="c"># man 3 printf = library section</span>
+help cmd                <span class="c"># docs for bash BUILTINS (man won't show these)</span>
+type -a cmd               <span class="c"># builtin/alias/external + search order — use over `which`</span>
+compgen -b                  <span class="c"># list all builtins</span></pre>
+</section>
+
+<section class="card" id="vars"><h2>5 · Variables</h2>
+<pre>name=Dave              <span class="c"># no spaces around =</span>
+echo "$name"             <span class="c"># ALWAYS double-quote expansions</span>
+unset name
+thing=$(uname -a)          <span class="c"># command substitution — preferred</span>
+thing=`uname -a`             <span class="c"># legacy backtick — avoid, hard to nest</span></pre>
+<p class="note">Built-ins: <code class="inline">$PATH $PWD $USER $HOSTNAME $RANDOM $SECONDS $EPOCHSECONDS</code>. Bash 5.3+: <code class="inline">${ cmd; }</code> runs in <em>current</em> shell (vs <code class="inline">$(...)</code> which forks a subshell).</p>
+</section>
+
+<section class="card" id="script"><h2>6 · Making scripts</h2>
+<pre>#!/usr/bin/env bash
+chmod +x script && ./script
+bash -n script        <span class="c"># syntax check only, no execution</span>
+bash -x script           <span class="c"># debug: prints every command run</span>
+bash -u script              <span class="c"># error on unset variables</span>
+set -x / set +x                <span class="c"># toggle tracing mid-script</span></pre>
+<p class="note">shellcheck (external tool) statically lints scripts — use it.</p>
+</section>
+
+<section class="card" id="input"><h2>7 · Taking input</h2>
+<pre>read -rp "Name: " name    <span class="c"># -r = don't mangle backslashes</span>
+echo "$1" "$#" "$@"        <span class="c"># arg1, argc, ALL args (quote "$@"!)</span>
+[[ -n "$1" ]]                <span class="c"># true if $1 is set/non-empty</span></pre>
+</section>
+
+<section class="card" id="cond"><h2>8 · Conditionals</h2>
+<pre>if [[ cond ]]; then ...
+elif [[ cond ]]; then ...
+else ...
+fi</pre>
+<table>
+<tr><td><code class="inline">== !=</code></td><td>string compare</td></tr>
+<tr><td><code class="inline">-f -d -e -s -L</code></td><td>file / dir / exists / non-empty / symlink</td></tr>
+</table>
+<p class="note">Prefer <code class="inline">[[ ]]</code> (bash keyword, safe unquoted) over <code class="inline">[ ]</code>/<code class="inline">test</code> (external-ish, quote everything). <code class="inline">while/until [[ cond ]]</code> loops too. Any command works as a condition — checks its exit code.</p>
+</section>
+
+<section class="card" id="loops"><h2>9 · Loops</h2>
+<pre>for x in foo bar baz; do echo "$x"; done
+for x in "$@"; do ...; done          <span class="c"># loop script args, quoted!</span>
+for i in {1..5}; do ...; done          <span class="c"># brace range, {1..10..2} step</span>
+for ((i=0;i&lt;10;i++)); do ...; done       <span class="c"># C-style — needed for variable limits</span>
+while read -r line; do ...; done &lt; file    <span class="c"># line by line, no subshell</span></pre>
+<p class="note"><code class="inline">continue</code> / <code class="inline">break</code> as usual.</p>
+</section>
+
+<section class="card" id="func"><h2>10 · Functions</h2>
+<pre>greet() {
+  local name=$1     <span class="c"># ALWAYS `local` — avoids global leaks</span>
+  echo "hello $name"
+}
+var=$(greet Dave)      <span class="c"># capture output — runs in subshell</span>
+return N                  <span class="c"># sets exit code, function-only ($? after)</span></pre>
+</section>
+
+<section class="card" id="case"><h2>11 · Case statements</h2>
+<pre>case "$var" in
+  pat1) cmd ;;
+  pat2|pat3) cmd ;;     <span class="c"># | = OR</span>
+  *) default ;;
+esac</pre>
+<p class="note"><code class="inline">;;</code> stop at match · <code class="inline">;&amp;</code> fall through · <code class="inline">;;&amp;</code> keep testing more patterns.</p>
+</section>
+
+<section class="card wide" id="arrays"><h2>12 · Arrays</h2>
+<pre>arr=(foo bar baz)
+"${arr[0]}"   "${arr[-1]}"     <span class="c"># index (curlies required), negative works</span>
+"${arr[@]}"                       <span class="c"># ALL elements — always quote + use @ to loop</span>
+"${arr[*]}"                          <span class="c"># ALL joined into one string (by $IFS) — for stringifying only</span>
+"${#arr[@]}"                            <span class="c"># length (count)</span>
+arr+=(more items)                          <span class="c"># append</span>
+new=("${arr[@]}" extra)                       <span class="c"># copy/extend</span>
+declare -A map; map[foo]=1                       <span class="c"># associative array, capital -A</span>
+for k in "${!map[@]}"; do echo "$k ${map[$k]}"; done  <span class="c"># ! = keys</span></pre>
+</section>
+
+<section class="card wide" id="param"><h2>13 · Parameter expansion (avoid forking external tools)</h2>
+<pre>${#s}                  <span class="c"># length</span>          ${s^} / ${s^^}      <span class="c"># capitalize first / all</span>
+${s,} / ${s,,}            <span class="c"># lowercase first / all</span>
+${s:-default}                <span class="c"># use s, else default (doesn't assign)</span>
+${s:=default}                   <span class="c"># same, but assigns default to s</span>
+${s:?msg}                          <span class="c"># error out if unset/empty — required-arg pattern</span>
+${s:offset:len}                       <span class="c"># substring</span>
+${s/find/repl}   ${s//find/repl}         <span class="c"># replace first / all</span>
+${s#pat} ${s##pat}                          <span class="c"># strip shortest/longest match from FRONT</span>
+${s%pat} ${s%%pat}                             <span class="c"># strip shortest/longest match from END (##/%% = greedy)</span>
+${path##*/}  ${path%/*}                           <span class="c"># poor-man's basename / dirname</span></pre>
+<p class="note">Same slicing/replace syntax works on arrays: <code class="inline">"${arr[@]/find/repl}"</code></p>
+</section>
+
+<section class="card" id="subst"><h2>14 · Command / process substitution</h2>
+<pre>$(command)      <span class="c"># capture stdout as string</span>
+&lt;(command)         <span class="c"># treat output AS A FILE — avoids the pipe-subshell var-loss gotcha</span>
+<span class="c"># classic bug: piping into `while` runs in a subshell, so counters vanish after</span>
+grep d f | while read -r w; do ((i++)); done   <span class="c"># $i lost!</span>
+while read -r w; do ((i++)); done &lt; &lt;(grep d f) <span class="c"># $i correct</span></pre>
+</section>
+
+<section class="card" id="math"><h2>15 · Arithmetic</h2>
+<pre>$((expr))            <span class="c"># expansion — no $ needed on vars inside</span>
+((expr))                <span class="c"># command form; false if result is 0!</span>
+((a>b?a:b))                <span class="c"># ternary works</span></pre>
+<p class="note">Leading zero = octal (<code class="inline">08</code> errors!). Force base: <code class="inline">10#$var</code>, <code class="inline">16#FF</code>. Use <code class="inline">(( a &gt; b ))</code> for numbers — <code class="inline">[[ $a &gt; $b ]]</code> is a <em>string</em> compare.</p>
+</section>
+
+<section class="card" id="source"><h2>16 · Sourcing / subshells</h2>
+<pre>source file.sh    <span class="c"># same as: . file.sh</span>
+( cmds )             <span class="c"># subshell — vars don't leak out</span>
+{ cmds; }               <span class="c"># current shell — needs trailing ; and space</span>
+if ! (return 0 2>/dev/null); then main "$@"; fi  <span class="c"># run-if-not-sourced guard</span></pre>
+</section>
+
+<section class="card" id="io2"><h2>17 · Exit codes & pipelines</h2>
+<pre>$?                     <span class="c"># exit code of last command</span>
+"${PIPESTATUS[@]}"        <span class="c"># exit code of EVERY stage in last pipeline (grab immediately!)</span>
+time cmd                    <span class="c"># real/user/sys — it's a keyword, so `sudo time x` fails</span></pre>
+<p class="note">In <code class="inline">a | b | c</code>, plain <code class="inline">$?</code> only reflects <code class="inline">c</code>.</p>
+</section>
+
+<section class="card" id="tools"><h2>18 · External text tools</h2>
+<table>
+<tr><td><code class="inline">tr 'a' 'b'</code></td><td>translate characters</td></tr>
+<tr><td><code class="inline">cut -d, -f1,3</code></td><td>fields by delimiter</td></tr>
+<tr><td><code class="inline">sed 's/old/new/g'</code></td><td>find/replace stream editor</td></tr>
+<tr><td><code class="inline">awk -F: '{print $1}'</code></td><td>field-based text mini-language</td></tr>
+<tr><td><code class="inline">sort | uniq -c</code></td><td>dedupe + frequency count</td></tr>
+<tr><td><code class="inline">wc -l/-w/-c</code></td><td>lines/words/bytes</td></tr>
+<tr><td><code class="inline">find . -type f -name "*.txt"</code></td><td>find files, <code class="inline">-exec cmd {} \;</code></td></tr>
+<tr><td><code class="inline">xargs</code></td><td>batch args from stdin</td></tr>
+</table>
+</section>
+
+<section class="card" id="globstar"><h2>19 · shopt / extended glob</h2>
+<pre>while IFS=: read -r name pass uid; do ...; done &lt; /etc/passwd  <span class="c"># delimited parsing, no cut needed</span>
+shopt -s extglob    <span class="c"># !(x) neg · +(x) 1+ · @(x) exactly-1 · *(x) 0+ · ?(x) 0-1</span>
+shopt -s nullglob      <span class="c"># unmatched glob → nothing, not literal string</span>
+shopt -s dotglob          <span class="c"># globs match dotfiles too</span>
+shopt -s globstar            <span class="c"># ** recurses subdirectories</span></pre>
+</section>
+
+<section class="card" id="brace"><h2>20 · Brace expansion</h2>
+<pre>file.{txt,jpg,mov}    <span class="c"># → 3 strings (NOT filesystem-aware, unlike globs)</span>
+{1..20}  {1..20..5}  {10..1}   <span class="c"># range, step, auto countdown</span></pre>
+<p class="note">No variables in ranges — <code class="inline">{1..$max}</code> fails; use a C-style for loop instead.</p>
+</section>
+
+<section class="card" id="printf"><h2>21 · printf</h2>
+<pre>printf '%s\n' "$var"     <span class="c"># NEVER printf "$var" raw — it's a format string</span>
+printf '%5s\n' hi           <span class="c"># right-pad to width 5</span>
+printf '%-5s\n' hi             <span class="c"># left-justify</span>
+printf '%05d\n' 7                 <span class="c"># zero-pad number</span>
+printf -v var '%s' val               <span class="c"># store into a variable</span>
+printf '%q\n' "$var"                    <span class="c"># shell-safely quote a string</span>
+printf '%(%F %T)T\n' -1                    <span class="c"># current date/time, builtin (no `date` fork)</span></pre>
+</section>
+
+<section class="card" id="regex"><h2>22 · Regex &amp; mapfile</h2>
+<pre>re='^(Dave|Joe)$'
+[[ "$x" =~ $re ]] && echo "${BASH_REMATCH[0]}"   <span class="c"># [0]=whole, [1]=group1…</span>
+mapfile -t arr &lt; file      <span class="c"># read file into array, -t trims newlines</span></pre>
+</section>
+
+<section class="card" id="test"><h2>23 · test vs [ ] vs [[ ]]</h2>
+<p class="note"><code class="inline">test</code> / <code class="inline">[</code> — legacy, both builtin &amp; external binary, quote everything. <code class="inline">[[ ]]</code> — bash keyword, better parsing, glob/regex aware. <strong>Always prefer <code class="inline">[[ ]]</code> in bash.</strong></p>
+</section>
+
+<section class="card wide" id="color"><h2>24 · ANSI colors &amp; prompt</h2>
+<pre>printf '\e[1mBOLD\e[0m\n'                 <span class="c"># \e=ESC · 1=bold 0=reset</span>
+printf '\e[31mred\e[0m\n'                    <span class="c"># 30-37 fg (0blk 1red 2grn 3ylw 4blu 5mag 6cyn 7wht), 40-47 bg</span>
+printf '\e[38;5;196mC256\e[0m\n'                <span class="c"># 256-color mode</span>
+printf '\e[38;2;255;0;0mRGB\e[0m\n'                <span class="c"># 24-bit true color</span>
+tput bold; tput setaf 1; tput sgr0                   <span class="c"># portable-ish; tput reset if terminal breaks</span>
+[[ -t 1 ]]                                              <span class="c"># is stdout a terminal? — auto-disable color when piped</span>
+PS1='...\[\e[32m\]\u@\h\[\e[0m\] \w\$ '                    <span class="c"># wrap color codes in \[ \] or cursor math breaks!</span></pre>
+</section>
+
+<section class="card" id="rc"><h2>25 · ~/.bashrc essentials</h2>
+<pre>[[ -z "$PS1" ]] && return    <span class="c"># bail if non-interactive</span>
+alias ll='ls -lh'
+shopt -s cdspell autocd extglob</pre>
+</section>
+
+<section class="card" id="traps"><h2>26 · Signals &amp; jobs</h2>
+<pre>trap cleanup EXIT        <span class="c"># run on script exit</span>
+trap 'echo hi' SIGINT       <span class="c"># respond to Ctrl+C</span>
+trap -l                        <span class="c"># list all signals</span>
+jobs · fg · bg · kill %1          <span class="c"># manage background jobs (Ctrl+Z suspends)</span></pre>
+<p class="note"><code class="inline">SIGKILL</code> (kill -9) can never be trapped.</p>
+</section>
+
+<section class="card" id="fifo"><h2>27 · Named pipes</h2>
+<pre>mkfifo pipe
+echo hi &gt; pipe      <span class="c"># blocks until read</span>
+exec 3&lt;&gt; pipe          <span class="c"># persistent fd; read -u 3 line</span></pre>
+</section>
+
+<section class="card wide" id="keys"><h2>28 · Readline shortcuts (Emacs mode)</h2>
+<table>
+<tr><td><kbd>Ctrl+R</kbd></td><td>reverse-search history</td><td><kbd>Ctrl+A</kbd> / <kbd>Ctrl+E</kbd></td><td>start / end of line</td></tr>
+<tr><td><kbd>Alt+B</kbd> / <kbd>Alt+F</kbd></td><td>back / forward one word</td><td><kbd>Ctrl+W</kbd></td><td>delete prev word</td></tr>
+<tr><td><kbd>Ctrl+U</kbd></td><td>delete to start of line</td><td><kbd>Alt+T</kbd> / <kbd>Ctrl+T</kbd></td><td>swap words / chars</td></tr>
+<tr><td><kbd>!!</kbd></td><td>rerun last command</td><td><kbd>!$</kbd></td><td>last arg of last command</td></tr>
+</table>
+</section>
+
+<section class="card wide pitfall" id="pitfalls"><h2>⚠ Big gotchas</h2>
+<ul class="tight">
+<li>Never loop over <code class="inline">$(ls ...)</code> — breaks on spaces/newlines in filenames. Use globs or <code class="inline">find -print0 | xargs -0</code>.</li>
+<li>Aliases can't take arguments the way you'd expect — use a <strong>function</strong>.</li>
+<li>Colored strings have invisible escape bytes — <code class="inline">${#str}</code> counts them too.</li>
+<li>Fork bomb <code class="inline">:(){ :|:& };:</code> — recursive exponential forking. Never run it. Know it to avoid it.</li>
+<li>Quote all expansions: <code class="inline">"$var"</code>, <code class="inline">"${arr[@]}"</code> — except plain <code class="inline">x=$y</code> assignment.</li>
+<li>Exit codes wrap at 256 — <code class="inline">exit 256</code> looks like success(0).</li>
+<li><code class="inline">$?</code> in a pipeline only reflects the last stage — use <code class="inline">PIPESTATUS</code>.</li>
+</ul>
+</section>
+
+    </div>
+    <footer>Source: Dave Eddy's free Bash course ("You Suck at Programming") · course.wiseap.sh</footer>
+  </main>
+</div>
+
+<script>
+(function(){
+  var cards = Array.prototype.slice.call(document.querySelectorAll('section.card'));
+  var toc = document.getElementById('toc');
+  cards.forEach(function(c){
+    var title = c.querySelector('h2').textContent.trim();
+    var a = document.createElement('a');
+    a.href = '#' + c.id; a.textContent = title;
+    toc.appendChild(a);
+  });
+
+  var search = document.getElementById('search');
+  search.addEventListener('input', function(){
+    var q = this.value.toLowerCase().trim();
+    cards.forEach(function(c){
+      var match = !q || c.textContent.toLowerCase().indexOf(q) !== -1;
+      c.classList.toggle('hide', !match);
+    });
+  });
+
+  var btn = document.getElementById('themeBtn');
+  var root = document.documentElement;
+  btn.addEventListener('click', function(){
+    var cur = root.getAttribute('data-theme');
+    root.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+  });
+})();
+</script>
+</body>
+</html>
